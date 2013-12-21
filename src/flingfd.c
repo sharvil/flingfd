@@ -22,7 +22,7 @@ bool flingfd_simple_send(const char *path, int fd) {
 int flingfd_simple_recv(const char *path) {
   flingfd_t *handle = flingfd_open(path);
   if (!handle)
-    return false;
+    return -1;
 
   int ret = flingfd_recv(handle);
   flingfd_close(&handle);
