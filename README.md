@@ -39,5 +39,9 @@ And here's the other process writing to the sender's `stdout`:
 
 When you're done writing your code, link against the library with `-lflingfd`.
 
+## Bindings
+
+* Python - https://github.com/soulseekah/pyflingfd
+
 ## License
 Apache 2.0
