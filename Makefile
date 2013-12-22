@@ -1,5 +1,5 @@
 PREFIX = /usr/local
-CFLAGS += -Wall -Werror -std=c99 -c
+CFLAGS += -Wall -Werror -std=c99 -c -D_GNU_SOURCE
 
 .PHONY:
 	all clean install
