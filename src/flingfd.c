@@ -14,7 +14,7 @@ bool flingfd_simple_send(const char *path, int fd) {
   if (!handle)
     return false;
 
-  bool success = flingfd_send(handle, fd);
+  bool success = (flingfd_send(handle, fd) != -1);
   flingfd_close(&handle);
   return success;
 }
@@ -58,11 +58,15 @@ flingfd_t *flingfd_open(const char *path) {
   return handle;
 
 error:
+  int errsv = errno;
+
   if (fd != -1)
     close(fd);
 
   free(path_copy);
   free(handle);
+
+  errno = errsv;
 
   return NULL;
 }
