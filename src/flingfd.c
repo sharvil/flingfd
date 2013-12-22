@@ -61,11 +61,8 @@ error:
   if (fd != -1)
     close(fd);
 
-  if (path_copy)
-    free(path_copy);
-
-  if (handle)
-    free(handle);
+  free(path_copy);
+  free(handle);
 
   return NULL;
 }
@@ -123,8 +120,7 @@ int flingfd_recv(flingfd_t *handle) {
   char buf[CMSG_SPACE(sizeof(int))];
   flingfd_init_msg_(&msg, &iov, buf, sizeof(buf));
 
-  int ret = recvmsg(handle->fd, &msg, 0);
-  if (ret == -1)
+  if (recvmsg(handle->fd, &msg, 0) == -1)
     return -1;
 
   for(struct cmsghdr *header = CMSG_FIRSTHDR(&msg); header != NULL; header = CMSG_NXTHDR(&msg, header))
@@ -142,9 +138,7 @@ void flingfd_close(flingfd_t **handle) {
   if ((*handle)->fd != -1)
     close((*handle)->fd);
 
-  if ((*handle)->path)
-    free((*handle)->path);
-
+  free((*handle)->path);
   free(*handle);
   *handle = NULL;
 }
