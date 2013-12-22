@@ -2,7 +2,7 @@ PREFIX = /usr/local
 CFLAGS += -Wall -Werror -std=c99 -c -D_GNU_SOURCE
 
 .PHONY:
-	all clean install
+	all clean install uninstall
 
 all:
 	$(CC) $(CFLAGS) src/flingfd.c -o src/.flingfd.o
