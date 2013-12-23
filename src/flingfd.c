@@ -57,7 +57,7 @@ flingfd_t *flingfd_open(const char *path) {
 
   return handle;
 
-error:
+error:;
   int errsv = errno;
 
   if (fd != -1)
@@ -127,12 +127,35 @@ int flingfd_recv(flingfd_t *handle) {
   if (recvmsg(handle->fd, &msg, 0) == -1)
     return -1;
 
-  for(struct cmsghdr *header = CMSG_FIRSTHDR(&msg); header != NULL; header = CMSG_NXTHDR(&msg, header))
-    if (header->cmsg_level == SOL_SOCKET && header->cmsg_type == SCM_RIGHTS)
-      return *(int *)CMSG_DATA(header);
+  int found_fd = -1;
+  bool oh_noes = false;
+  for (struct cmsghdr *header = CMSG_FIRSTHDR(&msg); header != NULL; header = CMSG_NXTHDR(&msg, header))
+    if (header->cmsg_level == SOL_SOCKET && header->cmsg_type == SCM_RIGHTS) {
+      int count = (header->cmsg_len - (CMSG_DATA(header) - (unsigned char *)header)) / sizeof(int);
+      for (int i = 0; i < count; ++i) {
+        int fd = ((int *)CMSG_DATA(header))[i];
+        if (found_fd == -1) {
+          found_fd = fd;
+        } else {
+          close(fd);
+          oh_noes = true;
+        }
+      }
+    }
 
-  errno = ENOENT;
-  return -1;
+  // The sender sent us more than one file descriptor. We've closed
+  // them all to prevent fd leaks but notify the caller that we got
+  // a bad message.
+  if (oh_noes) {
+    close(found_fd);
+    errno = EBADMSG;
+    return -1;
+  }
+
+  if (found_fd == -1)
+    errno = ENOENT;
+
+  return found_fd;
 }
 
 void flingfd_close(flingfd_t **handle) {
