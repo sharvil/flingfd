@@ -7,6 +7,12 @@
 
 #include "flingfd.h"
 
+struct flingfd_t {
+  int fd;
+  char *path;
+  bool is_bound;
+};
+
 static void flingfd_init_msg_(struct msghdr *msg, struct iovec *iov, char *buf, size_t buf_len);
 
 bool flingfd_simple_send(const char *path, int fd) {
@@ -27,6 +33,24 @@ int flingfd_simple_recv(const char *path) {
   int ret = flingfd_recv(handle);
   flingfd_close(&handle);
   return ret;
+}
+
+bool flingfd_socket_send(int socket_fd, int fd) {
+  flingfd_t handle;
+  handle.fd = socket_fd;
+  handle.path = NULL;
+  handle.is_bound = true;
+
+  return flingfd_send(&handle, fd) != -1;
+}
+
+int flingfd_socket_recv(int socket_fd) {
+  flingfd_t handle;
+  handle.fd = socket_fd;
+  handle.path = NULL;
+  handle.is_bound = true;
+
+  return flingfd_recv(&handle);
 }
 
 flingfd_t *flingfd_open(const char *path) {

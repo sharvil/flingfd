@@ -6,6 +6,8 @@ extern "C" {
 
 #include <stdbool.h>
 
+typedef struct flingfd_t flingfd_t;
+
 // Sends a single file descriptor to a receiver. Returns
 // true if successful, false otherwise.
 bool flingfd_simple_send(const char *path, int fd);
@@ -14,11 +16,13 @@ bool flingfd_simple_send(const char *path, int fd);
 // the file descriptor or -1 on error.
 int flingfd_simple_recv(const char *path);
 
-typedef struct {
-  int fd;
-  char *path;
-  bool is_bound;
-} flingfd_t;
+// Sends a single file descriptor over an existing Unix domain
+// socket. Returns true if successful, false otherwise.
+bool flingfd_socket_send(int socket_fd, int fd);
+
+// Receives a single file descriptor over an existing Unix domain
+// socket. Returns the file descriptor or -1 on error.
+int flingfd_socket_recv(int socket_fd);
 
 // Creates a new flingfd session for the specified path. You may send or
 // receive file descriptors over this session. The returned flingfd_t
