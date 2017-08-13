@@ -72,27 +72,27 @@ flingfd_t *flingfd_open(const char *path) {
     goto error;
 
   handle = (flingfd_t *)malloc(sizeof(flingfd_t));
-  if (!handle)
-    goto error;
+  if (!handle) {
+	  int errsv = errno;
 
-  handle->fd = fd;
-  handle->path = path_copy;
-  handle->is_bound = false;
+	  if (fd != -1)
+		  close(fd);
 
-  return handle;
+	  free(path_copy);
+	  free(handle);
 
-error:;
-  int errsv = errno;
+	  errno = errsv;
 
-  if (fd != -1)
-    close(fd);
+	  return NULL;
+  }
+  else {
 
-  free(path_copy);
-  free(handle);
+	  handle->fd = fd;
+	  handle->path = path_copy;
+	  handle->is_bound = false;
 
-  errno = errsv;
-
-  return NULL;
+	  return handle;
+  }
 }
 
 int flingfd_send(flingfd_t *handle, int fd) {
